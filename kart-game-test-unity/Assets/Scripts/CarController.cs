@@ -10,6 +10,22 @@ public class CarController : MonoBehaviour {
 	public float maxMotorTorque; // maximum torque the motor can apply to the wheels
 	public float maxSteeringAngle; // maximum steer angle the wheel can have
 
+	// Finds corresponding visual wheel and correctly applies the transform
+	public void ApplyLocalPositionToVisuals(WheelCollider collider) {
+		if (collider.transform.childCount == 0) {
+			return; // return if the wheelcollider has no children
+		}
+
+		Transform visualWheel = collider.transform.GetChild (0); // otherwise, get the first child of the collider
+
+		Vector3 position;
+		Quaternion rotation;
+		collider.GetWorldPose (out position, out rotation);
+
+		visualWheel.transform.position = position;
+		visualWheel.transform.rotation = rotation;
+	}
+
 	// Fixed update method for controlling the car
 	public void FixedUpdate () {
 		float motor = maxMotorTorque * Input.GetAxis ("Vertical"); // gets input from vertical axis for acceleration
@@ -24,6 +40,8 @@ public class CarController : MonoBehaviour {
 				axleInfo.leftWheel.motorTorque = motor; // change the state of the wheels if they are connected to a motor
 				axleInfo.rightWheel.motorTorque = motor;
 			}
+			ApplyLocalPositionToVisuals (axleInfo.leftWheel);
+			ApplyLocalPositionToVisuals (axleInfo.rightWheel);
 		}
 	}
 }
